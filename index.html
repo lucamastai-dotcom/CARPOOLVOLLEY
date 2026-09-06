@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CARPooling Volley</title>
+<title>CARPOOL VOLLEY</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -195,7 +195,7 @@
 <body>
 
 <header class="top">
-  <h1>CARPooling Volley</h1>
+  <h1>CARPOOL VOLLEY</h1>
   <p>Organizza chi porta e chi riprende le ragazze</p>
   <div class="copertura" id="blocco-copertura">
     <div class="etichetta">
@@ -212,6 +212,8 @@
   <div id="vista-accesso" class="box">
     <h2 id="titolo-accesso">Accedi</h2>
     <div id="campi-registrazione" class="nascosto">
+      <label for="reg-figlia">Nome della figlia</label>
+      <input type="text" id="reg-figlia" placeholder="Es. Giulia">
       <label for="reg-telefono">Telefono (opzionale)</label>
       <input type="tel" id="reg-telefono" placeholder="333 1234567">
     </div>
@@ -238,9 +240,9 @@
       <label for="nuovo-data">Data</label>
       <input type="date" id="nuovo-data">
       <label for="nuovo-inizio">Ora inizio</label>
-      <input type="time" id="nuovo-inizio">
+      <select id="nuovo-inizio"></select>
       <label for="nuovo-fine">Ora fine</label>
-      <input type="time" id="nuovo-fine">
+      <select id="nuovo-fine"></select>
       <label for="nuovo-luogo">Luogo</label>
       <input type="text" id="nuovo-luogo" placeholder="Palestra comunale">
       <button class="btn-primario" id="btn-salva-allenamento">Aggiungi allenamento</button>
@@ -262,6 +264,23 @@
   let datiApp = { genitori: [], allenamenti: [], disponibilita: [] };
 
   const el = id => document.getElementById(id);
+
+  function popolaOrari_(id) {
+    const select = el(id);
+    for (let ora = 0; ora < 24; ora++) {
+      for (let minuti of [0, 30]) {
+        const etichetta = String(ora).padStart(2, '0') + ':' + String(minuti).padStart(2, '0');
+        const opzione = document.createElement('option');
+        opzione.value = etichetta;
+        opzione.textContent = etichetta;
+        select.appendChild(opzione);
+      }
+    }
+  }
+  popolaOrari_('nuovo-inizio');
+  popolaOrari_('nuovo-fine');
+  el('nuovo-inizio').value = '18:00';
+  el('nuovo-fine').value = '19:30';
 
   async function chiamaApi(azione, payload) {
     const risposta = await fetch(API_URL, {
@@ -309,7 +328,7 @@
 
     const azione = modalitaRegistrazione ? 'registra' : 'login';
     const payload = modalitaRegistrazione
-      ? { nome, cognome, password, telefono: el('reg-telefono').value.trim() }
+      ? { nome, cognome, password, telefono: el('reg-telefono').value.trim(), nomeFiglia: el('reg-figlia').value.trim() }
       : { nome, cognome, password };
 
     el('btn-conferma-accesso').disabled = true;
@@ -369,7 +388,8 @@
 
   function nomeGenitore(id) {
     const g = datiApp.genitori.find(g => String(g.ID) === String(id));
-    return g ? `${g.Nome} ${g.Cognome}` : '—';
+    if (!g) return '—';
+    return g.NomeFiglia ? `${g.Nome} ${g.Cognome} (figlia: ${g.NomeFiglia})` : `${g.Nome} ${g.Cognome}`;
   }
 
   function disponibilitaPer(idAllenamento, tipo) {
