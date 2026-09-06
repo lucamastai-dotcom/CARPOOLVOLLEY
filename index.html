@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CARPooling Volley</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1C2B45;
+    --cream: #FAF6EF;
+    --amber: #E8A33D;
+    --sage: #4C8C6B;
+    --terracotta: #B85C4A;
+    --slate: #6B7280;
+    --line: #E4DED2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Manrope', system-ui, sans-serif;
+    background: var(--cream);
+    color: var(--navy);
+    line-height: 1.45;
+  }
+  header.top {
+    background: var(--navy);
+    color: var(--cream);
+    padding: 20px 18px 24px;
+  }
+  header.top h1 {
+    margin: 0 0 4px;
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  header.top p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #C7CEDB;
+  }
+  .copertura {
+    margin-top: 16px;
+  }
+  .copertura .etichetta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    color: #C7CEDB;
+    margin-bottom: 6px;
+  }
+  .copertura .barra {
+    height: 8px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .copertura .barra .riempimento {
+    height: 100%;
+    background: var(--amber);
+    transition: width 0.4s ease;
+  }
+  main {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 18px 16px 60px;
+  }
+  .box {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .box h2 {
+    margin: 0 0 14px;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+  label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--slate);
+    margin: 10px 0 4px;
+  }
+  input, select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    background: var(--cream);
+  }
+  input:focus, select:focus, button:focus {
+    outline: 2px solid var(--amber);
+    outline-offset: 1px;
+  }
+  button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    border-radius: 7px;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  .btn-primario {
+    width: 100%;
+    padding: 12px;
+    background: var(--navy);
+    color: #fff;
+    margin-top: 16px;
+  }
+  .btn-secondario {
+    background: none;
+    color: var(--navy);
+    text-decoration: underline;
+    padding: 10px 0 0;
+    font-weight: 500;
+    font-size: 0.85rem;
+  }
+  .errore {
+    color: var(--terracotta);
+    font-size: 0.85rem;
+    margin-top: 10px;
+  }
+  .barra-utente {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .barra-utente span { font-size: 0.88rem; color: var(--slate); }
+  .barra-utente button {
+    background: none;
+    color: var(--slate);
+    font-weight: 500;
+    font-size: 0.82rem;
+    text-decoration: underline;
+    padding: 0;
+  }
+  .scheda-allenamento {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-left: 5px solid var(--terracotta);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .scheda-allenamento.parziale { border-left-color: var(--amber); }
+  .scheda-allenamento.coperto { border-left-color: var(--sage); }
+  .scheda-allenamento .data {
+    font-weight: 700;
+    font-size: 0.98rem;
+  }
+  .scheda-allenamento .dettagli {
+    font-size: 0.85rem;
+    color: var(--slate);
+    margin: 2px 0 12px;
+  }
+  .tratta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-top: 1px solid var(--line);
+  }
+  .tratta:first-of-type { border-top: none; }
+  .tratta .info { font-size: 0.85rem; }
+  .tratta .info .tipo { font-weight: 700; display: block; }
+  .tratta .info .nomi { color: var(--slate); }
+  .tratta button {
+    padding: 7px 12px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+  .btn-candidati { background: var(--sage); color: #fff; }
+  .btn-revoca { background: var(--cream); color: var(--terracotta); border: 1px solid var(--terracotta) !important; }
+  .avviso-revoca {
+    font-size: 0.78rem;
+    color: var(--terracotta);
+    margin-top: 6px;
+  }
+  .vuoto {
+    text-align: center;
+    color: var(--slate);
+    font-size: 0.9rem;
+    padding: 24px 0;
+  }
+  .nascosto { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>CARPooling Volley</h1>
+  <p>Organizza chi porta e chi riprende le ragazze</p>
+  <div class="copertura" id="blocco-copertura">
+    <div class="etichetta">
+      <span>Copertura settimana</span>
+      <span id="testo-copertura">0/0 tratte</span>
+    </div>
+    <div class="barra"><div class="riempimento" id="barra-copertura" style="width:0%"></div></div>
+  </div>
+</header>
+
+<main>
+
+  <!-- SCHERMATA LOGIN / REGISTRAZIONE -->
+  <div id="vista-accesso" class="box">
+    <h2 id="titolo-accesso">Accedi</h2>
+    <div id="campi-registrazione" class="nascosto">
+      <label for="reg-telefono">Telefono (opzionale)</label>
+      <input type="tel" id="reg-telefono" placeholder="333 1234567">
+    </div>
+    <label for="campo-nome">Nome</label>
+    <input type="text" id="campo-nome" placeholder="Il tuo nome">
+    <label for="campo-cognome">Cognome</label>
+    <input type="text" id="campo-cognome" placeholder="Il tuo cognome">
+    <label for="campo-password">Password</label>
+    <input type="password" id="campo-password" placeholder="••••••••">
+    <button class="btn-primario" id="btn-conferma-accesso">Accedi</button>
+    <button class="btn-secondario" id="btn-alterna-modalita">Non hai un account? Registrati</button>
+    <p class="errore nascosto" id="errore-accesso"></p>
+  </div>
+
+  <!-- APP PRINCIPALE (visibile dopo login) -->
+  <div id="vista-app" class="nascosto">
+    <div class="barra-utente">
+      <span id="testo-utente"></span>
+      <button id="btn-esci">Esci</button>
+    </div>
+
+    <div class="box nascosto" id="box-nuovo-allenamento">
+      <h2>Aggiungi allenamento</h2>
+      <label for="nuovo-data">Data</label>
+      <input type="date" id="nuovo-data">
+      <label for="nuovo-inizio">Ora inizio</label>
+      <input type="time" id="nuovo-inizio">
+      <label for="nuovo-fine">Ora fine</label>
+      <input type="time" id="nuovo-fine">
+      <label for="nuovo-luogo">Luogo</label>
+      <input type="text" id="nuovo-luogo" placeholder="Palestra comunale">
+      <button class="btn-primario" id="btn-salva-allenamento">Aggiungi allenamento</button>
+      <p class="errore nascosto" id="errore-nuovo-allenamento"></p>
+    </div>
+
+    <div id="lista-allenamenti"></div>
+    <p class="vuoto nascosto" id="messaggio-vuoto">Nessun allenamento in programma.</p>
+  </div>
+
+</main>
+
+<script>
+  // Incolla qui l'URL della distribuzione Apps Script (Distribuisci > Nuova distribuzione)
+  const API_URL = 'https://script.google.com/macros/s/AKfycbz0f7nyUSfGmdvaQGI-kxSBwsnxHSYYlCTAVqiTtqzzrK4-QOcxCHBya1Rht7X9baY/exec';
+
+  let modalitaRegistrazione = false;
+  let utenteCorrente = null; // { ID, Nome, Cognome, Ruolo } — solo in memoria, si perde al refresh
+  let datiApp = { genitori: [], allenamenti: [], disponibilita: [] };
+
+  const el = id => document.getElementById(id);
+
+  async function chiamaApi(azione, payload) {
+    const risposta = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // evita il preflight CORS su Apps Script
+      body: JSON.stringify({ azione, ...payload })
+    });
+    return risposta.json();
+  }
+
+  async function caricaDati() {
+    const risposta = await fetch(API_URL);
+    const json = await risposta.json();
+    if (json.ok) {
+      datiApp = json;
+      disegnaAllenamenti();
+      aggiornaCopertura();
+    }
+  }
+
+  // --- ACCESSO ---
+
+  el('btn-alterna-modalita').addEventListener('click', () => {
+    modalitaRegistrazione = !modalitaRegistrazione;
+    el('titolo-accesso').textContent = modalitaRegistrazione ? 'Registrati' : 'Accedi';
+    el('btn-conferma-accesso').textContent = modalitaRegistrazione ? 'Crea account' : 'Accedi';
+    el('btn-alterna-modalita').textContent = modalitaRegistrazione
+      ? 'Hai già un account? Accedi'
+      : 'Non hai un account? Registrati';
+    el('campi-registrazione').classList.toggle('nascosto', !modalitaRegistrazione);
+  });
+
+  el('btn-conferma-accesso').addEventListener('click', async () => {
+    const nome = el('campo-nome').value.trim();
+    const cognome = el('campo-cognome').value.trim();
+    const password = el('campo-password').value;
+    const erroreBox = el('errore-accesso');
+    erroreBox.classList.add('nascosto');
+
+    if (!nome || !cognome || !password) {
+      erroreBox.textContent = 'Compila nome, cognome e password.';
+      erroreBox.classList.remove('nascosto');
+      return;
+    }
+
+    const azione = modalitaRegistrazione ? 'registra' : 'login';
+    const payload = modalitaRegistrazione
+      ? { nome, cognome, password, telefono: el('reg-telefono').value.trim() }
+      : { nome, cognome, password };
+
+    el('btn-conferma-accesso').disabled = true;
+    const risultato = await chiamaApi(azione, payload);
+    el('btn-conferma-accesso').disabled = false;
+
+    if (!risultato.ok) {
+      erroreBox.textContent = risultato.errore;
+      erroreBox.classList.remove('nascosto');
+      return;
+    }
+    utenteCorrente = risultato.genitore;
+    entraNellApp();
+  });
+
+  el('btn-esci').addEventListener('click', () => {
+    utenteCorrente = null;
+    el('vista-app').classList.add('nascosto');
+    el('vista-accesso').classList.remove('nascosto');
+  });
+
+  function entraNellApp() {
+    el('vista-accesso').classList.add('nascosto');
+    el('vista-app').classList.remove('nascosto');
+    el('testo-utente').textContent = `${utenteCorrente.Nome} ${utenteCorrente.Cognome}`;
+    el('box-nuovo-allenamento').classList.toggle('nascosto', utenteCorrente.Ruolo !== 'admin');
+    caricaDati();
+  }
+
+  // --- AGGIUNGI ALLENAMENTO (solo admin) ---
+
+  el('btn-salva-allenamento').addEventListener('click', async () => {
+    const payload = {
+      idGenitore: utenteCorrente.ID,
+      data: el('nuovo-data').value,
+      oraInizio: el('nuovo-inizio').value,
+      oraFine: el('nuovo-fine').value,
+      luogo: el('nuovo-luogo').value.trim()
+    };
+    const erroreBox = el('errore-nuovo-allenamento');
+    erroreBox.classList.add('nascosto');
+
+    const risultato = await chiamaApi('aggiungiAllenamento', payload);
+    if (!risultato.ok) {
+      erroreBox.textContent = risultato.errore;
+      erroreBox.classList.remove('nascosto');
+      return;
+    }
+    el('nuovo-data').value = '';
+    el('nuovo-inizio').value = '';
+    el('nuovo-fine').value = '';
+    el('nuovo-luogo').value = '';
+    caricaDati();
+  });
+
+  // --- LISTA ALLENAMENTI ---
+
+  function nomeGenitore(id) {
+    const g = datiApp.genitori.find(g => String(g.ID) === String(id));
+    return g ? `${g.Nome} ${g.Cognome}` : '—';
+  }
+
+  function disponibilitaPer(idAllenamento, tipo) {
+    return datiApp.disponibilita.filter(d =>
+      String(d.IdAllenamento) === String(idAllenamento) &&
+      d.Tipo === tipo &&
+      d.Stato === 'attiva'
+    );
+  }
+
+  function disegnaAllenamenti() {
+    const contenitore = el('lista-allenamenti');
+    contenitore.innerHTML = '';
+
+    const allenamenti = [...datiApp.allenamenti].sort((a, b) =>
+      new Date(a.Data + 'T' + a.OraInizio) - new Date(b.Data + 'T' + b.OraInizio)
+    );
+
+    el('messaggio-vuoto').classList.toggle('nascosto', allenamenti.length > 0);
+
+    allenamenti.forEach(allenamento => {
+      const andata = disponibilitaPer(allenamento.ID, 'andata');
+      const ritorno = disponibilitaPer(allenamento.ID, 'ritorno');
+      const copertoAndata = andata.length > 0;
+      const copertoRitorno = ritorno.length > 0;
+
+      const scheda = document.createElement('div');
+      scheda.className = 'scheda-allenamento ' +
+        (copertoAndata && copertoRitorno ? 'coperto' : (copertoAndata || copertoRitorno ? 'parziale' : ''));
+
+      const dataLeggibile = new Date(allenamento.Data + 'T00:00:00').toLocaleDateString('it-IT', {
+        weekday: 'long', day: 'numeric', month: 'long'
+      });
+
+      scheda.innerHTML = `
+        <div class="data">${dataLeggibile}</div>
+        <div class="dettagli">${allenamento.OraInizio}–${allenamento.OraFine} · ${allenamento.Luogo}</div>
+        <div class="tratta" data-tipo="andata"></div>
+        <div class="tratta" data-tipo="ritorno"></div>
+      `;
+
+      ['andata', 'ritorno'].forEach(tipo => {
+        const righeTratta = tipo === 'andata' ? andata : ritorno;
+        const mieDisponibilita = righeTratta.filter(d => String(d.IdGenitore) === String(utenteCorrente.ID));
+        const sonoCandidato = mieDisponibilita.length > 0;
+
+        const contenitoreTratta = scheda.querySelector(`[data-tipo="${tipo}"]`);
+        const nomi = righeTratta.map(d => nomeGenitore(d.IdGenitore)).join(', ');
+
+        const bottone = document.createElement('button');
+        if (sonoCandidato) {
+          bottone.className = 'btn-revoca';
+          bottone.textContent = 'Revoca';
+          bottone.addEventListener('click', () => revocaDisponibilita(mieDisponibilita[0].ID, allenamento));
+        } else {
+          bottone.className = 'btn-candidati';
+          bottone.textContent = 'Mi candido';
+          bottone.addEventListener('click', () => candidatiPerTratta(allenamento.ID, tipo));
+        }
+
+        contenitoreTratta.innerHTML = `
+          <div class="info">
+            <span class="tipo">${tipo === 'andata' ? 'Andata' : 'Ritorno'}</span>
+            <span class="nomi">${nomi || 'Nessuno candidato'}</span>
+          </div>
+        `;
+        contenitoreTratta.appendChild(bottone);
+      });
+
+      contenitore.appendChild(scheda);
+    });
+  }
+
+  async function candidatiPerTratta(idAllenamento, tipo) {
+    const risultato = await chiamaApi('candidati', { idGenitore: utenteCorrente.ID, idAllenamento, tipo });
+    if (!risultato.ok) { alert(risultato.errore); return; }
+    caricaDati();
+  }
+
+  async function revocaDisponibilita(idDisponibilita, allenamento) {
+    const risultato = await chiamaApi('revoca', { idDisponibilita, idGenitore: utenteCorrente.ID });
+    if (!risultato.ok) { alert(risultato.errore); return; }
+    if (risultato.avvisoAdmin) {
+      alert('Mancano meno di 2 ore all\'allenamento: avvisa l\'admin su WhatsApp che la tratta si è liberata.');
+    }
+    caricaDati();
+  }
+
+  // --- CONTATORE DI COPERTURA SETTIMANALE ---
+
+  function aggiornaCopertura() {
+    const oggi = new Date();
+    const inizioSettimana = new Date(oggi);
+    inizioSettimana.setDate(oggi.getDate() - oggi.getDay() + 1); // lunedì
+    inizioSettimana.setHours(0, 0, 0, 0);
+    const fineSettimana = new Date(inizioSettimana);
+    fineSettimana.setDate(inizioSettimana.getDate() + 7);
+
+    const allenamentiSettimana = datiApp.allenamenti.filter(a => {
+      const d = new Date(a.Data + 'T00:00:00');
+      return d >= inizioSettimana && d < fineSettimana;
+    });
+
+    let coperte = 0;
+    const totali = allenamentiSettimana.length * 2; // andata + ritorno per ognuno
+
+    allenamentiSettimana.forEach(a => {
+      if (disponibilitaPer(a.ID, 'andata').length > 0) coperte++;
+      if (disponibilitaPer(a.ID, 'ritorno').length > 0) coperte++;
+    });
+
+    el('testo-copertura').textContent = `${coperte}/${totali} tratte`;
+    el('barra-copertura').style.width = totali > 0 ? `${(coperte / totali) * 100}%` : '0%';
+  }
+</script>
+
+</body>
+</html>
