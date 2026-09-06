@@ -444,7 +444,7 @@
           bottone.className = 'btn-revoca';
           bottone.textContent = 'Revoca';
           bottone.addEventListener('click', () => revocaDisponibilita(mieDisponibilita[0].ID, allenamento));
-        } else {
+        } else if (righeTratta.length === 0) {
           bottone.className = 'btn-candidati';
           bottone.textContent = 'Mi candido';
           bottone.addEventListener('click', () => candidatiPerTratta(allenamento.ID, tipo));
