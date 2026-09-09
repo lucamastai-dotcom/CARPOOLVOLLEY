@@ -211,18 +211,20 @@
   <!-- SCHERMATA LOGIN / REGISTRAZIONE -->
   <div id="vista-accesso" class="box">
     <h2 id="titolo-accesso">Accedi</h2>
+    <label for="campo-nome">Nome</label>
+    <input type="text" id="campo-nome" placeholder="Il tuo nome">
+    <div id="gruppo-cognome" class="nascosto">
+      <label for="campo-cognome">Cognome</label>
+      <input type="text" id="campo-cognome" placeholder="Il tuo cognome">
+    </div>
+    <label for="campo-password">Password</label>
+    <input type="password" id="campo-password" placeholder="••••••••">
     <div id="campi-registrazione" class="nascosto">
       <label for="reg-figlia">Nome della figlia</label>
       <input type="text" id="reg-figlia" placeholder="Es. Giulia">
       <label for="reg-telefono">Telefono (opzionale)</label>
       <input type="tel" id="reg-telefono" placeholder="333 1234567">
     </div>
-    <label for="campo-nome">Nome</label>
-    <input type="text" id="campo-nome" placeholder="Il tuo nome">
-    <label for="campo-cognome">Cognome</label>
-    <input type="text" id="campo-cognome" placeholder="Il tuo cognome">
-    <label for="campo-password">Password</label>
-    <input type="password" id="campo-password" placeholder="••••••••">
     <button class="btn-primario" id="btn-conferma-accesso">Accedi</button>
     <button class="btn-secondario" id="btn-alterna-modalita">Non hai un account? Registrati</button>
     <p class="errore nascosto" id="errore-accesso"></p>
@@ -234,6 +236,8 @@
       <span id="testo-utente"></span>
       <button id="btn-esci">Esci</button>
     </div>
+
+    <button class="btn-secondario nascosto" id="btn-toggle-nuovo-allenamento" style="margin-bottom:14px;">+ Aggiungi allenamento</button>
 
     <div class="box nascosto" id="box-nuovo-allenamento">
       <h2>Aggiungi allenamento</h2>
@@ -247,6 +251,11 @@
       <input type="text" id="nuovo-luogo" placeholder="Palestra comunale">
       <button class="btn-primario" id="btn-salva-allenamento">Aggiungi allenamento</button>
       <p class="errore nascosto" id="errore-nuovo-allenamento"></p>
+    </div>
+
+    <div class="barra-utente" style="margin-top:4px;">
+      <button class="btn-revoca" id="btn-settimana-attuale" style="border-color:var(--navy) !important; color:var(--navy);">Settimana attuale</button>
+      <button class="btn-secondario" id="btn-settimana-successiva">Vedi settimana successiva →</button>
     </div>
 
     <div id="lista-allenamenti"></div>
@@ -311,6 +320,7 @@
       ? 'Hai già un account? Accedi'
       : 'Non hai un account? Registrati';
     el('campi-registrazione').classList.toggle('nascosto', !modalitaRegistrazione);
+    el('gruppo-cognome').classList.toggle('nascosto', !modalitaRegistrazione);
   });
 
   el('btn-conferma-accesso').addEventListener('click', async () => {
@@ -320,8 +330,10 @@
     const erroreBox = el('errore-accesso');
     erroreBox.classList.add('nascosto');
 
-    if (!nome || !cognome || !password) {
-      erroreBox.textContent = 'Compila nome, cognome e password.';
+    if (!nome || !password || (modalitaRegistrazione && !cognome)) {
+      erroreBox.textContent = modalitaRegistrazione
+        ? 'Compila nome, cognome e password.'
+        : 'Compila nome e password.';
       erroreBox.classList.remove('nascosto');
       return;
     }
@@ -329,7 +341,7 @@
     const azione = modalitaRegistrazione ? 'registra' : 'login';
     const payload = modalitaRegistrazione
       ? { nome, cognome, password, telefono: el('reg-telefono').value.trim(), nomeFiglia: el('reg-figlia').value.trim() }
-      : { nome, cognome, password };
+      : { nome, password };
 
     el('btn-conferma-accesso').disabled = true;
     const risultato = await chiamaApi(azione, payload);
@@ -344,6 +356,13 @@
     entraNellApp();
   });
 
+  el('btn-toggle-nuovo-allenamento').addEventListener('click', () => {
+    const box = el('box-nuovo-allenamento');
+    const aperto = !box.classList.contains('nascosto');
+    box.classList.toggle('nascosto', aperto);
+    el('btn-toggle-nuovo-allenamento').textContent = aperto ? '+ Aggiungi allenamento' : '– Chiudi';
+  });
+
   el('btn-esci').addEventListener('click', () => {
     utenteCorrente = null;
     el('vista-app').classList.add('nascosto');
@@ -354,7 +373,8 @@
     el('vista-accesso').classList.add('nascosto');
     el('vista-app').classList.remove('nascosto');
     el('testo-utente').textContent = `${utenteCorrente.Nome} ${utenteCorrente.Cognome}`;
-    el('box-nuovo-allenamento').classList.toggle('nascosto', utenteCorrente.Ruolo !== 'admin');
+    el('box-nuovo-allenamento').classList.add('nascosto');
+    el('btn-toggle-nuovo-allenamento').classList.toggle('nascosto', utenteCorrente.Ruolo !== 'admin');
     caricaDati();
   }
 
@@ -400,13 +420,45 @@
     );
   }
 
+  let settimanaOffset = 0; // 0 = settimana attuale, 1 = settimana successiva
+
+  function intervalloSettimana_(offset) {
+    const oggi = new Date();
+    const inizio = new Date(oggi);
+    inizio.setDate(oggi.getDate() - oggi.getDay() + 1 + offset * 7); // lunedì
+    inizio.setHours(0, 0, 0, 0);
+    const fine = new Date(inizio);
+    fine.setDate(inizio.getDate() + 7);
+    return { inizio, fine };
+  }
+
+  el('btn-settimana-attuale').addEventListener('click', () => selezionaSettimana(0));
+  el('btn-settimana-successiva').addEventListener('click', () => selezionaSettimana(1));
+
+  function selezionaSettimana(offset) {
+    settimanaOffset = offset;
+    const attivo = { borderColor: 'var(--navy)', color: 'var(--navy)' };
+    el('btn-settimana-attuale').className = offset === 0 ? 'btn-revoca' : 'btn-secondario';
+    el('btn-settimana-attuale').style.cssText = offset === 0 ? 'border-color:var(--navy) !important; color:var(--navy);' : '';
+    el('btn-settimana-successiva').className = offset === 1 ? 'btn-revoca' : 'btn-secondario';
+    el('btn-settimana-successiva').style.cssText = offset === 1 ? 'border-color:var(--navy) !important; color:var(--navy);' : '';
+    el('btn-settimana-successiva').textContent = offset === 1 ? 'Settimana successiva' : 'Vedi settimana successiva →';
+    disegnaAllenamenti();
+    aggiornaCopertura();
+  }
+
   function disegnaAllenamenti() {
     const contenitore = el('lista-allenamenti');
     contenitore.innerHTML = '';
 
-    const allenamenti = [...datiApp.allenamenti].sort((a, b) =>
-      new Date(a.Data + 'T' + a.OraInizio) - new Date(b.Data + 'T' + b.OraInizio)
-    );
+    const { inizio, fine } = intervalloSettimana_(settimanaOffset);
+
+    const allenamenti = datiApp.allenamenti
+      .filter(a => {
+        const d = new Date(a.Data + 'T00:00:00');
+        return d >= inizio && d < fine;
+      })
+      .sort((a, b) => new Date(a.Data + 'T' + a.OraInizio) - new Date(b.Data + 'T' + b.OraInizio));
 
     el('messaggio-vuoto').classList.toggle('nascosto', allenamenti.length > 0);
 
@@ -478,19 +530,14 @@
     caricaDati();
   }
 
-  // --- CONTATORE DI COPERTURA SETTIMANALE ---
+  // --- CONTATORE DI COPERTURA (segue la settimana selezionata sopra) ---
 
   function aggiornaCopertura() {
-    const oggi = new Date();
-    const inizioSettimana = new Date(oggi);
-    inizioSettimana.setDate(oggi.getDate() - oggi.getDay() + 1); // lunedì
-    inizioSettimana.setHours(0, 0, 0, 0);
-    const fineSettimana = new Date(inizioSettimana);
-    fineSettimana.setDate(inizioSettimana.getDate() + 7);
+    const { inizio, fine } = intervalloSettimana_(settimanaOffset);
 
     const allenamentiSettimana = datiApp.allenamenti.filter(a => {
       const d = new Date(a.Data + 'T00:00:00');
-      return d >= inizioSettimana && d < fineSettimana;
+      return d >= inizio && d < fine;
     });
 
     let coperte = 0;
@@ -501,6 +548,8 @@
       if (disponibilitaPer(a.ID, 'ritorno').length > 0) coperte++;
     });
 
+    document.querySelector('.copertura .etichetta span:first-child').textContent =
+      settimanaOffset === 0 ? 'Copertura settimana attuale' : 'Copertura settimana successiva';
     el('testo-copertura').textContent = `${coperte}/${totali} tratte`;
     el('barra-copertura').style.width = totali > 0 ? `${(coperte / totali) * 100}%` : '0%';
   }
